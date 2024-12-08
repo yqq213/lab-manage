@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-size: 14px;
+  color: @base-font-color;
+}
+
+li {
+  list-style: none;
+}
+
+p {
+  margin: 0;
+}
+
+.ant-btn, .ant-select-selector, .ant-pagination-item {
+  border-radius: 2px !important;
+}
+
+:where(.css-dev-only-do-not-override-1h82g5x).ant-pagination .ant-pagination-item {
+  border: 1px solid #d9d9d9;
+}
+:where(.css-dev-only-do-not-override-1h82g5x).ant-pagination .ant-pagination-item-active {
+  border-color: #1f9172;
+}
+
+/* 自定义滚动条宽度 */
+::-webkit-scrollbar {
+  width: 8px; /* 垂直滚动条宽度 */
+  height: 8px; /* 水平滚动条高度 */
+}
+
+/* 自定义滚动条轨道 */
+::-webkit-scrollbar-track {
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+/* 自定义滚动条滑块 */
+::-webkit-scrollbar-thumb {
+  background: #b4b4b4;
+  border-radius: 10px;
+}
+

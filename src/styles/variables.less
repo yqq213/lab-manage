@@ -1,0 +1,41 @@
+// 首屏header高度
+@header-height: 105px;
+
+// error color
+@error-color: #FF5053;
+
+// primary color
+@primary-color: #1f9172;
+
+// 输入框高度
+@input-height: 36px;
+
+// 字体颜色
+@base-font-color: #535353;
+
+// 字体颜色
+@main-font-color: #333;
+
+// flex布局
+.flex(@horizontal: center, @vertical: center, @direction: row) {
+  display: flex;
+  justify-content: @horizontal;
+  align-items: @vertical;
+  flex-direction: @direction;
+}
+
+// 单行超出显示省略号
+.textOverflow {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+// 多行超出显示省略号
+.lineClamp(@num) {
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  -webkit-line-clamp: @num;
+}

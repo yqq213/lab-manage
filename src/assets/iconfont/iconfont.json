@@ -1,0 +1,51 @@
+{
+  "id": "4755668",
+  "name": "实验室设备管理",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "21273712",
+      "name": "arrow-down",
+      "font_class": "arrow-down",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "15092700",
+      "name": "数据管理",
+      "font_class": "shujuguanli",
+      "unicode": "e81f",
+      "unicode_decimal": 59423
+    },
+    {
+      "icon_id": "38855404",
+      "name": "分组管理",
+      "font_class": "fenzuguanli",
+      "unicode": "e946",
+      "unicode_decimal": 59718
+    },
+    {
+      "icon_id": "1825189",
+      "name": "user",
+      "font_class": "renyuanguanli",
+      "unicode": "e65e",
+      "unicode_decimal": 58974
+    },
+    {
+      "icon_id": "18916431",
+      "name": "设备",
+      "font_class": "shebei",
+      "unicode": "e6b8",
+      "unicode_decimal": 59064
+    },
+    {
+      "icon_id": "42510121",
+      "name": "实验室管理",
+      "font_class": "shiyanshiguanli",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    }
+  ]
+}
