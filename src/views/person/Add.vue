@@ -74,10 +74,20 @@ const formState = ref({
 })
 const formRef = ref()
 
+// 手机号校验
+const checkPhone = async (_rule: Rule, value: string) => {
+  const regex = /^1[3-9]\d{9}$/
+  if (regex.test(value)) {
+    return Promise.resolve()
+  } else {
+    return Promise.reject('请输入正确的手机号码')
+  }
+}
+
 const rules: Record<string, Rule[]> = {
   ident: [{ required: true, message: '编号不能为空！', trigger: 'blur' }],
   name: [{ required: true, message: '姓名不能为空！', trigger: 'blur' }],
-  phone: [{ required: true, message: '手机不能为空！', trigger: 'blur' }],
+  phone: [{ required: true, message: '手机不能为空！', trigger: 'blur' }, { validator: checkPhone, trigger: blur }],
   // password: [{ required: true, message: '密码不能为空！', trigger: 'blur' }],
   department: [{ required: true, message: '院系不能为空！', trigger: 'blur' }],
   gender: [{ required: true, message: '性别不能为空！', trigger: 'change' }],

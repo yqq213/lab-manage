@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
 
 export const subRoute = [
@@ -49,7 +49,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.VITE_PUBLIC_PATH),
+  history: createWebHashHistory(import.meta.env.VITE_PUBLIC_PATH),
   routes,
   scrollBehavior: () => ({ left: 0, top: 0 })
 })
