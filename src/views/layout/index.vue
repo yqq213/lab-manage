@@ -4,7 +4,11 @@
     <div class="layout-right">
       <Header class="layout-header"></Header>
       <div class="layout-container">
-        <router-view class="layout-inner"></router-view>
+        <router-view class="layout-inner" v-slot="{ Component }">
+          <transition mode="out-in" name="fade-transform">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
     </div>
   </div>
@@ -37,6 +41,7 @@ import { ref } from 'vue'
     height: calc(100% - @header-height);
     padding: 20px;
     background: #f2f4f6;
+    overflow-x: hidden;
   }
   &-inner {
     background: #fff;

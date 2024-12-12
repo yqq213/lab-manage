@@ -7,14 +7,14 @@
         </a-col>
         <a-col>
           <a-select
-            v-model:value="queryParam.deviceId"
+            v-model:value="queryParam.deviceName"
             show-search
             allowClear
             :options="equipList"
             :filter-option="filterOption"
             :fieldNames="{
               label: 'name',
-              value: 'id'
+              value: 'name'
             }"
             placeholder="设备"
             @change="pagination.current = 1, getList()">
@@ -22,14 +22,14 @@
         </a-col>
         <a-col>
           <a-select
-            v-model:value="queryParam.labRoomId"
+            v-model:value="queryParam.labRoomName"
             show-search
             allowClear
             :options="labList"
             :filter-option="filterOption"
             :fieldNames="{
               label: 'name',
-              value: 'id'
+              value: 'name'
             }"
             placeholder="实验室"
             @change="pagination.current = 1, getList()">
@@ -37,14 +37,14 @@
         </a-col>
         <a-col>
           <a-select
-            v-model:value="queryParam.topicGroupId"
+            v-model:value="queryParam.topicGroupName"
             show-search
             allowClear
             :options="groupList"
             :filter-option="filterOption"
             :fieldNames="{
               label: 'name',
-              value: 'id'
+              value: 'name'
             }"
             placeholder="分组"
             @change="pagination.current = 1, getList()">
@@ -52,7 +52,7 @@
           </a-select>
         </a-col>
         <a-col>
-          <a-input-search v-model:value="queryParam.name" enter-button placeholder="使用人员" @search="pagination.current = 1, getList()" />
+          <a-input-search v-model:value="queryParam.userName" enter-button placeholder="使用人员" @search="pagination.current = 1, getList()" />
         </a-col>
       </a-row>
       <a-button type="primary" @click="handleExport">

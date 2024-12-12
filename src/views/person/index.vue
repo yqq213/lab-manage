@@ -2,19 +2,19 @@
   <div class="wrapper">
     <div class="filter">
       <a-row :gutter="20" class="filter-left">
-        <a-col :span="6">
+        <a-col style="width: 250px;">
           <a-select v-model:value="currentRole" @change="pagination.current = 1, getList()">
             <a-select-option value="1">老师</a-select-option>
             <a-select-option value="0">学生</a-select-option>
           </a-select>
         </a-col>
-        <a-col :span="6">
+        <!-- <a-col :span="6">
           <a-select v-model:value="origin" placeholder="请选择数据来源">
             <a-select-option :value="1">自主注册</a-select-option>
             <a-select-option :value="2">平台对接</a-select-option>
           </a-select>
-        </a-col>
-        <a-col :span="6">
+        </a-col> -->
+        <a-col style="width: 250px;">
           <a-input-search v-model:value="searchName" enter-button placeholder="输入姓名搜索" @search="pagination.current = 1, getList()" />
         </a-col>
       </a-row>

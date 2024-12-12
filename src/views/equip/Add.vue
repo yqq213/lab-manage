@@ -45,20 +45,23 @@
         <a-form-item name="code" label="开关码">
           <a-input v-model:value="formState.code" placeholder="请输入开关码（必填）" :maxlength="40"/>
         </a-form-item>
-        <a-form-item name="upload" label="添加图像">
+        <a-form-item name="thumb" label="添加图像">
           <a-upload
-            v-model:fileList="formState.upload"
-            action="https://labreserve.clntc.com:8443/api/v1.0.0/uploadSingleFile"
+            action=""
+            :show-upload-list="false"
             :headers="{ 'X-Access-Token': token }"
             name="avatar"
             list-type="picture-card"
-            :show-upload-list="false"
             :before-upload="beforeUpload"
             :customRequest="customRequest"
           >
-            <div class="upload-wrap">
+            <div class="upload-wrap" v-if="!imgUrl">
               <PlusOutlined />
               <div style="margin-top: 8px;">Upload</div>
+            </div>
+            <div class="uploadImg" v-else>
+              <img :src="imgUrl" />
+              <DeleteOutlined class="remove" @click.stop="handleRemoveImg"/>
             </div>
           </a-upload>
         </a-form-item>
@@ -72,13 +75,15 @@
 </template>
 
 <script setup lang="ts">
-import { LeftOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { LeftOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { Rule } from 'ant-design-vue/es/form';
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import { addEquip, editEquip, equipDetail, fileUpload } from '@/api/equip/index'
 import { getLabList } from '@/api/lab/index'
 import { Storage } from '@/utils/storage'
+import SparkMD5 from 'spark-md5'
+import { getFileExtension } from '@/utils/index'
 
 const props = defineProps({
   editObj: {
@@ -93,6 +98,18 @@ const labList = ref([])
 
 const token = Storage.get('token')
 
+const imgUrl = computed(() => formState.value.thumb ? import.meta.env.VITE_FILE_PREFIX + formState.value.thumb : '')
+
+// const fileList = computed(() => formState.value.thumb ? [{ url: import.meta.VITE_FILE_PREFIX + formState.value.thumb }])
+// const fileList = ref([{
+//   // url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
+//   uid: '-xxx',
+//     percent: 50,
+//     name: 'image.png',
+//     status: 'uploading',
+//     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+// }])
+
 const formState = ref({
   ident: '',
   name: '',
@@ -104,7 +121,7 @@ const formState = ref({
   status: '0',
   // interval: '',
   code: '',
-  upload: [],
+  thumb: '',
 })
 
 const rules: Record<string, Rule[]> = {
@@ -117,7 +134,6 @@ const rules: Record<string, Rule[]> = {
   status: [{ required: true, message: '设备状态不能为空！', trigger: 'change' }],
   // interval: [{ required: true, message: '设备间隔不能为空！', trigger: 'blur' }],
   code: [{ required: true, message: '开关码不能为空！', trigger: 'blur' }],
-  // upload: [{ required: true, message: '设备图像不能为空！', trigger: 'change' }],
 }
 
 const formRef = ref()
@@ -133,13 +149,26 @@ function beforeUpload(file) {
 
 // 自定义上传
 function customRequest({file, onSuccess, onError}) {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('fileName', file.name)
-  formData.append('ident', '')
-  // fileUpload(formData).then(res => {
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    const fileBuffer = e.target!.result
+    const spark = new SparkMD5.ArrayBuffer()
+    spark.append(fileBuffer)
+    const hexHash = spark.end(false)
 
-  // })
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('fileName', file.name)
+    formData.append('ident', hexHash)
+    formData.append('totalSize', file.size)
+    formData.append('suffixName', getFileExtension(file.name))
+
+    fileUpload(formData).then(({ data }) => {
+      formState.value.thumb = data.url
+      fileList.value = [{ url: import.meta.env.VITE_FILE_PREFIX + data.url }]
+    })
+  }
+  reader.readAsArrayBuffer(file)
 }
 
 // 重置
@@ -160,10 +189,16 @@ function handleSubmit() {
   })
 }
 
+// 删除图片
+function handleRemoveImg() {
+  formState.value.thumb = ''
+}
+
 // 设备详情
 function getDetail(id) {
   equipDetail({ id }).then(({ data }) => {
     formState.value = data
+    // data.thumb ? fileList.value = [{ url: import.meta.env.VITE_FILE_PREFIX + data.thumb }] : fileList.value = []
   })
 }
 
@@ -209,6 +244,46 @@ onMounted(() => {
     }
     :deep(.ant-form-item) {
       margin-bottom: 40px;
+    }
+    :deep(.ant-upload-select) {
+      padding: 8px;
+      .uploadImg {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        .flex();
+        &::before {
+          content: '';
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.45);
+          position: absolute;
+          z-index: 1;
+          opacity: 0;
+          transition: all ease .5s;
+          left: 0;
+        }
+        &:hover {
+          &::before {
+            opacity: 1;
+          }
+          .remove {
+            opacity: 1;
+          }
+        }
+        img {
+          width: 100%;
+          height: 100%;
+        }
+        .remove {
+          color: #fff;
+          position: absolute;
+          opacity: 0;
+          transition: all ease .5s;
+          font-size: 16px;
+          z-index: 9;
+        }
+      }
     }
     .upload-wrap {
       height: 100%;
