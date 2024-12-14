@@ -57,7 +57,7 @@
           >
             <div class="upload-wrap" v-if="!imgUrl">
               <PlusOutlined />
-              <div style="margin-top: 8px;">Upload</div>
+              <div style="margin-top: 8px;">上传</div>
             </div>
             <div class="uploadImg" v-else>
               <img :src="imgUrl" />
