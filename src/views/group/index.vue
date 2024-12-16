@@ -132,6 +132,9 @@ const rules: Record<string, Rule[]> = {
 const teacherList = ref([])
 const studentList = ref([])
 
+let studentMembersBak = []  // 编辑时备份学生成员
+let teacherMembersBak = []  // 编辑时备份老师成员
+
 // 获取列表
 function getList() {
   const param = {
@@ -160,6 +163,10 @@ function handleEdit(record) {
   // 格式化teacherMembers与studentMembers
   record.studentMembers ? formState.value.studentMembers = formState.value.studentMembers.map(v => v.id) : formState.value.studentMembers = []
   record.teacherMembers ? formState.value.teacherMembers = formState.value.teacherMembers.map(v => v.id) : formState.value.teacherMembers = []
+  // 编辑时将studentMembers与teacherMembers提前存储，方便提交时对比，判断出要删除的数据
+  studentMembersBak = [...formState.value.studentMembers]
+  teacherMembersBak = [...formState.value.teacherMembers]
+  console.log(studentMembersBak, teacherMembersBak)
 }
 
 // 删除
@@ -186,7 +193,15 @@ function handleOk() {
     const isEditMode = !!editObj.value.id
     const api = isEditMode ? editGroup : addGroup
     const param = formState.value
-    if (isEditMode) param.id = editObj.value.id
+    if (isEditMode) {
+      param.id = editObj.value.id
+      // 获取老师或学生组员中删除的数据
+      param.delStudentMembers = studentMembersBak.filter(v => !formState.value.studentMembers.includes(v))
+      param.delTeacherMembers = teacherMembersBak.filter(v => !formState.value.teacherMembers.includes(v))
+    } else {
+      param.delStudentMembers = []
+      param.delTeacherMembers = []
+    }
     api(param).then(() => {
       isEditMode ? message.success('修改成功') : message.success('添加成功')
       modalVisible.value = false
@@ -203,7 +218,7 @@ function handleClose() {
 
 // 教师列表
 async function getAllTeacher() {
-  const { data } = await userList({ order: '0', page: 1, pageSize: 10000 })
+  const { data } = await userList({ order: '0', page: 1, pageSize: 10000, status: '0' })
   teacherList.value = data.list.filter(v => v.role == '1')
   studentList.value = data.list.filter(v => v.role == '0')
 }

@@ -43,7 +43,7 @@
           <span class="label-suffix">分钟</span>
         </a-form-item> -->
         <a-form-item name="code" label="开关码">
-          <a-input v-model:value="formState.code" placeholder="请输入开关码（必填）" :maxlength="40"/>
+          <a-input v-model:value="formState.code" placeholder="请输入开关码（必填）" :maxlength="255"/>
         </a-form-item>
         <a-form-item name="thumb" label="添加图像">
           <a-upload
@@ -99,16 +99,6 @@ const labList = ref([])
 const token = Storage.get('token')
 
 const imgUrl = computed(() => formState.value.thumb ? import.meta.env.VITE_FILE_PREFIX + formState.value.thumb : '')
-
-// const fileList = computed(() => formState.value.thumb ? [{ url: import.meta.VITE_FILE_PREFIX + formState.value.thumb }])
-// const fileList = ref([{
-//   // url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png'
-//   uid: '-xxx',
-//     percent: 50,
-//     name: 'image.png',
-//     status: 'uploading',
-//     url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
-// }])
 
 const formState = ref({
   ident: '',

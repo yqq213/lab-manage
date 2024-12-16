@@ -17,6 +17,14 @@
     </div>
     <a-table size="middle" :dataSource="tableList" :columns="columns" :loading="loading" :pagination="pagination" @change="handleSizeChange">
       <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'managers'">
+          <a-tooltip placement="top" v-if="record.managers">
+            <template #title v-if="record.managers.length > 5">
+              <span>{{ getManagers(record.managers, false) }}</span>
+            </template>
+            <div>{{ getManagers(record.managers, true) }}</div>
+          </a-tooltip>
+        </template>
         <template v-if="column.dataIndex === 'action'">
           <a-button size="small" @click="handleEdit(record)">修改</a-button>
           <a-button size="small" type="primary" danger style="margin: 0 10px;" @click="handleDelete(record)">删除</a-button>
@@ -28,15 +36,22 @@
     <a-modal
       v-model:open="modalVisible"
       title="分配老师"
+      width="800px"
       :afterClose="handleClose"
-      @ok="handleOk">
-      <a-form :model="formState" ref="formRef" :rules="rules" autocomplete="off" style="padding: 20px 0 10px 0;">
-        <a-form-item name="userId">
-          <a-select allowClear v-model:value="formState.userId" placeholder="选择老师" size="large">
-            <a-select-option v-for="item in allTeacher" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
-          </a-select>
-        </a-form-item>
-      </a-form>
+      :footer="null">
+      <div class="add-form">
+        <a-select allowClear v-model:value="formState.userId" placeholder="请选择要分配的老师" style="width: 300px; margin-right: 20px;">
+          <a-select-option v-for="item in allTeacher" :key="item.id" :value="item.id" :disabled="editObj.managers && editObj.managers.includes(item.id)">{{ item.name }}</a-select-option>
+        </a-select>
+        <a-button type="primary" @click="handleAdd">添加</a-button>
+      </div>
+      <div class="add-list" v-if="editObj.managers">
+        <li v-for="item in editObj.managers" :key="item">
+          <div class="tag">{{ allTeacher.find(v => v.id === item)?.name }}</div>
+          <MinusCircleOutlined class="del-icon" @click="handleDelManager(item)"/>
+        </li>
+      </div>
+      <a-empty :image="simpleImage" v-else />
     </a-modal>
   </div>
   <!-- 添加/修改 -->
@@ -44,14 +59,16 @@
 </template>
 
 <script setup lang="ts">
-import { PlusOutlined } from '@ant-design/icons-vue'
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons-vue'
 import { reactive, ref, createVNode, onMounted } from 'vue'
 import type { Rule } from 'ant-design-vue/es/form'
-import { message, Modal } from 'ant-design-vue'
+import { message, Modal, Empty } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import Add from './Add.vue'
 import { getEquipList, editEquip, addManager, delManager } from '@/api/equip/index'
 import { userList } from '@/api/user/index'
+
+const simpleImage = Empty.PRESENTED_IMAGE_SIMPLE;
 
 const search = ref('')
 
@@ -71,39 +88,37 @@ const formState = reactive({
 
 const allTeacher = ref([])
 
-const formRef = ref()
-const rules: Record<string, Rule[]> = {
-  userId: [{ required: true, message: '请选择老师', trigger: 'change' }],
-}
-
 const tableList = ref([])
 
 const columns = [
   {
     title: '设备编号',
     align: 'center',
-    width: '25%',
     dataIndex: 'ident',
     key: 'ident'
   },
   {
     title: '设备名称',
     align: 'center',
-    width: '25%',
     dataIndex: 'name',
     key: 'name'
   },
   {
     title: '收费标准（元/h）',
     align: 'center',
-    width: '25%',
     dataIndex: 'price',
     key: 'price'
   },
   {
+    title: '管理人员',
+    align: 'center',
+    dataIndex: 'managers',
+    key: 'managers'
+  },
+  {
     title: '操作',
     align: 'center',
-    width: '25%',
+    width: '220px',
     dataIndex: 'action',
     key: 'action'
   }
@@ -117,6 +132,12 @@ const pagination = ref({
   size: 'middle'
 })
 
+// 获取管理人员
+function getManagers(list, showEllipse) {
+  const nameList = list.map(v => allTeacher.value.find(i => i.id === v)?.name)
+  return showEllipse && list.length > 5 ? `${nameList.slice(0, 5)?.join('、')}...` : nameList.join('、')
+}
+
 function handleSizeChange(page) {
   pagination.value = page
   getList()
@@ -125,7 +146,7 @@ function handleSizeChange(page) {
 // 获取列表
 function getList() {
   loading.value = true
-  getEquipList({ order: '0', page: pagination.value.current, pageSize: pagination.value.pageSize, name: search.value }).then(res => {
+  return getEquipList({ order: '0', page: pagination.value.current, pageSize: pagination.value.pageSize, name: search.value }).then(res => {
     loading.value = false
     tableList.value = res.data.list
     pagination.value.total = Number(res.data.pageTotal)
@@ -156,23 +177,32 @@ function handleDelete(record) {
   })
 }
 
-// 确定
-function handleOk() {
-  formRef.value.validate().then(() => {
-    // const api = formState.userId ? addManager : delManager
+// 添加老师
+function handleAdd() {
+  if (!formState.userId) return message.error('请选择要分配的老师')
+  addManager({ deviceId: editObj.value.id, userId: formState.userId }).then(() => {
+    message.success('分配老师成功')
+    getList().then(() => {
+      // 更新editObj对象数据
+      editObj.value = tableList.value.find(v => v.id === editObj.value.id)
+    })
+  })
+}
 
-    addManager({ deviceId: editObj.value.id, userId: formState.userId }).then(() => {
-      // formState.userId ? message.success('分配老师成功') : message.success('取消分配老师成功')
-      message.success('分配老师成功')
-      modalVisible.value = false
-      getList()
+// 移除老师
+function handleDelManager(id) {
+  delManager({ deviceId: editObj.value.id, userId: id }).then(() => {
+    message.success('移除成功')
+    getList().then(() => {
+      // 更新editObj对象数据
+      editObj.value = tableList.value.find(v => v.id === editObj.value.id)
     })
   })
 }
 
 // 弹窗关闭
 function handleClose() {
-  formRef.value.resetFields()
+  formState.userId = null
 }
 
 // 关闭新增、编辑页面
@@ -186,18 +216,12 @@ function handleCloseAdd() {
 function handleAssign(record) {
   editObj.value = record
   modalVisible.value = true
-  // 确保老师状态及时更新
-  getAllTeacher()
 }
 
-// 获取所有老师
-function getAllTeacher() {
-  userList({ order: '0', page: 1, pageSize: 10000, role: '1' }).then(({ data }) => {
-    allTeacher.value = data.list
-  })
-}
-
-onMounted(() => {
+onMounted(async () => {
+  // 获取所有老师
+  const { data } = await userList({ order: '0', page: 1, pageSize: 10000, role: '1', status: '0' })
+  allTeacher.value = data.list
   getList()
 })
 
@@ -209,7 +233,33 @@ onMounted(() => {
   .filter {
     .flex(space-between);
     margin-bottom: 20px;
-    
+  }
+}
+.add-form {
+  padding: 30px;
+  margin: 0 30px 30px 30px;
+  border-bottom: 1px solid #d9d9d9;
+  .flex();
+}
+.add-list {
+  padding: 0 20px 20px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  li {
+    .flex(center, center, column);
+    margin-bottom: 20px;
+    .tag {
+      padding: 5px 10px;
+      background: @primary-color;
+      margin: 0 15px;
+      color: #fff;
+      border-radius: 3px;
+      margin-bottom: 7px;
+    }
+    .del-icon {
+      color: @error-color;
+      cursor: pointer;
+    }
   }
 }
 </style>
