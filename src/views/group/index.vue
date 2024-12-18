@@ -124,9 +124,9 @@ const formRef = ref()
 const formState = ref({})
 const rules: Record<string, Rule[]> = {
   name: [{ required: true, message: '分组名称不能为空！', trigger: 'blur' }],
-  managerId: [{ required: true, message: '组长不能为空！', trigger: 'change' }],
-  teacherMembers: [{ required: true, message: '教师组员不能为空！', trigger: 'change' }],
-  studentMembers: [{ required: true, message: '学生组员不能为空！', trigger: 'change' }],
+  // managerId: [{ required: true, message: '组长不能为空！', trigger: 'change' }],
+  // teacherMembers: [{ required: true, message: '教师组员不能为空！', trigger: 'change' }],
+  // studentMembers: [{ required: true, message: '学生组员不能为空！', trigger: 'change' }],
 }
 
 const teacherList = ref([])

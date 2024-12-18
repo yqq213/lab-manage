@@ -16,7 +16,7 @@
         </a-form-item>
         <a-form-item name="price" label="收费标准" class="label-suffix-item">
           <a-input-number v-model:value="formState.price" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
-          <span class="label-suffix">元&nbsp;/&nbsp;h</span>
+          <span class="label-suffix">元/小时</span>
         </a-form-item>
         <a-form-item name="labRoomId" label="实验室">
           <a-select v-model:value="formState.labRoomId" placeholder="请选择实验室">
@@ -223,10 +223,10 @@ onMounted(() => {
     margin: 30px auto;
     .label-suffix-item {
       :deep(.ant-input-number) {
-        width: calc(100% - 40px);
+        width: calc(100% - 50px);
       }
       .label-suffix {
-        width: 40px;
+        width: 50px;
         display: inline-block;
         text-align: right;
         vertical-align: sub;

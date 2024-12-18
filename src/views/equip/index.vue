@@ -104,7 +104,7 @@ const columns = [
     key: 'name'
   },
   {
-    title: '收费标准（元/h）',
+    title: '收费标准（元/小时）',
     align: 'center',
     dataIndex: 'price',
     key: 'price'

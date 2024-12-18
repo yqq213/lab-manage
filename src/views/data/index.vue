@@ -105,6 +105,21 @@ const labList = ref([])
 const groupList = ref([])
 
 const tableList = ref([])
+// const tableList = ref([
+//   {
+//     deviceIdent: '123456',
+//     deviceName: '测试设备名称',
+//     deviceManagerNames: ['薛亚亚', '周成功', '汪剑剑', '杨庆庆'],
+//     labRoomAddress: '实验室一楼实验室一楼实验室一楼实验室一楼实验室一楼',
+//     price: 100,
+//     userName: '薛亚亚',
+//     examinerName: '周成功',
+//     topicGroupName: '分组一',
+//     startTime: '2024-01-01',
+//     endTime: '2024-01-01',
+//     duration: '20'
+//   }
+// ])
 
 const columns = [
   {
@@ -142,6 +157,12 @@ const columns = [
     align: 'center',
     dataIndex: 'userName',
     key: 'userName'
+  },
+  {
+    title: '审核人员',
+    align: 'center',
+    dataIndex: 'examinerName',
+    key: 'examinerName'
   },
   {
     title: '人员分组',
@@ -199,8 +220,8 @@ function getList() {
     page: pagination.value.current,
     pageSize: pagination.value.pageSize,
     ...queryParam,
-    startDate: queryDate.value[0],
-    endDate: queryDate.value[1]
+    startDate: queryDate.value?.[0],
+    endDate: queryDate.value?.[1]
   }
   getDataList(param).then(({ data }) => {
     loading.value = false
