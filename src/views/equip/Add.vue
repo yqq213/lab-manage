@@ -8,8 +8,8 @@
     </div>
     <div class="form-wrap">
       <a-form :model="formState" :rules="rules" ref="formRef" autocomplete="off" :labelCol="{ style: { width: '90px' } }">
-        <a-form-item name="ident" label="设备编号">
-          <a-input v-model:value="formState.ident" placeholder="设备编号最多40个字（必填）" :maxlength="40"/>
+        <a-form-item name="ident" label="设备编号" v-if="editObj.id">
+          <a-input v-model:value="formState.ident" disabled />
         </a-form-item>
         <a-form-item name="name" label="设备名称">
           <a-input v-model:value="formState.name" placeholder="设备名称最多40个字（必填）" :maxlength="40"/>
@@ -115,7 +115,6 @@ const formState = ref({
 })
 
 const rules: Record<string, Rule[]> = {
-  ident: [{ required: true, message: '设备编号不能为空！', trigger: 'blur' }],
   name: [{ required: true, message: '设备名称不能为空！', trigger: 'blur' }],
   price: [{ required: true, message: '收费标准不能为空！', trigger: 'blur' }],
   paramInfo: [{ required: true, message: '设备参数不能为空！', trigger: 'blur' }],

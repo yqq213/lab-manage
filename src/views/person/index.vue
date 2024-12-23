@@ -18,6 +18,21 @@
           <a-input-search v-model:value="searchName" enter-button placeholder="输入姓名搜索" @search="pagination.current = 1, getList()" />
         </a-col>
       </a-row>
+      <a-upload
+        action=""
+        :accept="'.xls,.xlsx'"
+        :headers="{ 'X-Access-Token': token }"
+        :show-upload-list="false"
+        :before-upload="beforeUpload"
+        :customRequest="customRequest"
+      >
+        <a-button :loading="uplaodLoading" style="margin-right: 30px;">
+          <template #icon>
+            <UploadOutlined />
+          </template>
+          批量上传
+        </a-button>
+      </a-upload>
       <a-button type="primary" @click="handleOperate('add')" v-if="currentRole == '1'">
         <template #icon>
           <PlusOutlined />
@@ -53,12 +68,16 @@
 import { PlusOutlined } from '@ant-design/icons-vue'
 import { ref, createVNode, computed, onMounted } from 'vue'
 import { Modal, message } from 'ant-design-vue'
-import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { ExclamationCircleOutlined, UploadOutlined } from '@ant-design/icons-vue'
 import Add from './Add.vue'
 import EquipList from '../lab/EquipList.vue'
-import { userList, updateUser, resetPwd } from '@/api/user/index'
+import { userList, updateUser, resetPwd, batchRegist } from '@/api/user/index'
+import { Storage } from '@/utils/storage'
+import * as XLSX from 'xlsx'
 
 const loading = ref(false)
+
+const uplaodLoading = ref(false)
 
 // 老师or学生   1: 老师  0: 学生
 const currentRole = ref('1')
@@ -90,6 +109,9 @@ const columns = computed(() => currentRole.value == '1' ? teacherColumns : stude
 
 // data
 const tableList = ref([])
+
+// token
+const token = Storage.get('token')
 
 // 教师表格
 const teacherColumns = [
@@ -216,6 +238,62 @@ function handleEquip(record) {
   currentEquip.value = record
 }
 
+// 上传文件校验
+function beforeUpload(file) {
+  if (!/excel|spreadsheet/.test(file.type)) {
+    message.error('请上传excel文件')
+    return false
+  }
+  return true
+}
+
+// 自定义上传
+function customRequest({file, onSuccess, onError}) {
+  uplaodLoading.value = true
+  // 读取excel文件数据
+  const reader = new FileReader()
+  reader.onload = function(e) {
+    const data = e.target.result
+    const workbook = XLSX.read(data, { type: 'binary' })
+    // 读取第一个工作表
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    // 将工作表数据转换为 JSON 格式
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+    // 去除表格头部
+    jsonData.shift()
+    console.log(jsonData)
+    // 封装数据
+    const param = jsonData.map(item => {
+      const obj = {}
+      const columnTeacherMap = [{ name: '老师编号', key: 'ident' }, { name: '老师姓名', key: 'name' }, { name: '老师手机', key: 'phone' }, { name: '老师性别', key: 'gender' }]
+      const columnStudentMap = [{ name: '学生编号', key: 'ident' }, { name: '学生姓名', key: 'name' }, { name: '学生手机', key: 'phone' }, { name: '老师性别', key: 'gender' }, { name: '学生院系', key: 'depement' }]
+      item.forEach((v, i) => {
+        try {
+          if (currentRole.value === '1') obj[columnTeacherMap[i]['key']] = v
+          if (currentRole.value === '0') obj[columnStudentMap[i]['key']] = v
+        } catch (error) {
+          message.error('请上传正确的excel模板')
+          uplaodLoading.value = false
+          throw new Error('请上传正确的excel模板')
+        }
+      })
+      obj.account = obj.ident
+      obj.password = '123456'
+      obj.role = currentRole.value
+      obj.gender === '男' ? obj.gender = '1' : obj.gender === '女' ? obj.gender = '2' : obj.gender = undefined
+      return obj
+    })
+    batchRegist({ users: param }).then(({ data }) => {
+      message.success(`上传成功${data.successCount}个，失败${data.failureCount}个，已存在${data.existCount}个`)
+      getList()
+    }).finally(() => {
+      uplaodLoading.value = false
+    })
+  }
+  reader.readAsBinaryString(file)
+}
+
 onMounted(() => {
   getList()
 })
@@ -230,6 +308,7 @@ onMounted(() => {
     margin-bottom: 20px;
     &-left {
       width: 60%;
+      flex: 1;
       :deep(.ant-select) {
         width: 100%;
       }

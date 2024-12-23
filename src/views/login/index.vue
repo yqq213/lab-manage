@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <img src="@/assets/images/school_logo.png" class="login-logo">
+    <!-- <img src="@/assets/images/school_logo.png" class="login-logo"> -->
     <div class="login-wrap">
       <p class="login-title">欢迎登录实验室管理系统</p>
       <p class="login-sub_title">WELCOME</p>

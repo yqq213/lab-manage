@@ -55,21 +55,21 @@
           <a-input-search v-model:value="queryParam.userName" enter-button placeholder="使用人员" @search="pagination.current = 1, getList()" />
         </a-col>
       </a-row>
-      <a-button type="primary" @click="handleExport">
+      <a-button type="primary" :loading="exportLoading" @click="handleExport">
         <template #icon>
           <UploadOutlined />
         </template>
         导出
       </a-button>
     </div>
+    <!-- :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" -->
     <a-table
       size="middle"
       :dataSource="tableList"
       :columns="columns"
       :loading="loading"
       :pagination="pagination"
-      @change="handleSizeChange"
-      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }">
+      @change="handleSizeChange">
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'group'">
           <a-tag color="#1f9172">{{ text }}</a-tag>
@@ -90,6 +90,7 @@ import { getLabList } from '@/api/lab/index'
 import { getGroupList } from '@/api/group/index'
 import { getDataList } from '@/api/data/index'
 import Member from '@/components/Member/index.vue'
+import * as XLSX from 'xlsx'
 
 const queryParam = reactive({})
 
@@ -99,27 +100,14 @@ const selectedRowKeys = ref([])
 
 const loading = ref(false)
 
+const exportLoading = ref(false)
+
 // 筛选条件列表
 const equipList = ref([])
 const labList = ref([])
 const groupList = ref([])
 
 const tableList = ref([])
-// const tableList = ref([
-//   {
-//     deviceIdent: '123456',
-//     deviceName: '测试设备名称',
-//     deviceManagerNames: ['薛亚亚', '周成功', '汪剑剑', '杨庆庆'],
-//     labRoomAddress: '实验室一楼实验室一楼实验室一楼实验室一楼实验室一楼',
-//     price: 100,
-//     userName: '薛亚亚',
-//     examinerName: '周成功',
-//     topicGroupName: '分组一',
-//     startTime: '2024-01-01',
-//     endTime: '2024-01-01',
-//     duration: '20'
-//   }
-// ])
 
 const columns = [
   {
@@ -147,7 +135,7 @@ const columns = [
     key: 'labRoomAddress'
   },
   {
-    title: '价格',
+    title: '价格(元/小时)',
     align: 'center',
     dataIndex: 'price',
     key: 'price'
@@ -171,6 +159,12 @@ const columns = [
     key: 'topicGroupName'
   },
   {
+    title: '预约日期',
+    align: 'center',
+    dataIndex: 'date',
+    key: 'date'
+  },
+  {
     title: '上机时间',
     align: 'center',
     dataIndex: 'startTime',
@@ -183,7 +177,7 @@ const columns = [
     key: 'endTime'
   },
   {
-    title: '时长',
+    title: '时长(小时)',
     align: 'center',
     dataIndex: 'duration',
     key: 'duration'
@@ -245,7 +239,31 @@ function initFilterList() {
 
 // 导出
 function handleExport() {
-
+  exportLoading.value = true
+  // 获取全部数据
+  getDataList({ order: '0', page: 1, pageSize: 10000, ...queryParam, startDate: queryDate.value?.[0], endDate: queryDate.value?.[1] }).then(({ data }) => {
+    const list = data.list || []
+    // 表格数据
+    const excelList = []
+    // 获取表头数据
+    const excelHead = columns.map(item => item.title)
+    excelList.push(excelHead)
+    const keyList = columns.map(v => v.dataIndex)
+    list.forEach(item => {
+      const excelRow = keyList.map(v => {
+        return Array.isArray(item[v]) ? item[v].join(',') : item[v]
+      })
+      excelList.push(excelRow)
+    })
+    console.log(excelList)
+    exportLoading.value = false
+    // 创建工作表
+    const ws = XLSX.utils.aoa_to_sheet(excelList);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    // 导出为 Excel 文件
+    XLSX.writeFile(wb, 'data.xlsx');
+  })
 }
 
 onMounted(() => {

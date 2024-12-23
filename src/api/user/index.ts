@@ -11,6 +11,11 @@ export const regist: (data) => Promise<BizResponse<any>> = (data) => {
   return request.post('/api/v1.0.0/auth/regist', data)
 }
 
+// 批量注册
+export const batchRegist: (data) => Promise<BizResponse<any>> = (data) => {
+  return request.post('/api/v1.0.0/auth/batchRegist', data)
+}
+
 // 退出
 export const logout: () => Promise<BizResponse<any>> = () => {
   return request.post('/api/v1.0.0/auth/logout')

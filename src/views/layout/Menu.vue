@@ -1,7 +1,8 @@
 <template>
   <div class="menu">
     <div class="menu-header">
-      <span>中国药科大学</span>
+      <!-- <span>中国药科大学</span> -->
+      <img src="@/assets/images/lab-title-icon.png" />
     </div>
     <a-menu
       v-model:selectedKeys="selectedKeys"
@@ -18,7 +19,6 @@
 import { ref, reactive, h } from 'vue'
 import { ItemType } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
-// import { subRoute } from '@/router/index'
 
 const route = useRoute()
 const router = useRouter()
@@ -75,8 +75,9 @@ function handleClickItem({key}) {
 .menu {
   &-header {
     height: @header-height;
-    background: url('@/assets/images/header_logo.png') center no-repeat;
-    background-size: 100% 100%;
+    // background: url('@/assets/images/header_logo.png') center no-repeat;
+    // background-size: 100% 100%;
+    background: #1fa085;
     color: #fff;
     font-weight: bold;
     font-size: 20px;
