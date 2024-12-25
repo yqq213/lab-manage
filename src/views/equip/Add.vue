@@ -98,7 +98,7 @@ const labList = ref([])
 
 const token = Storage.get('token')
 
-const imgUrl = computed(() => formState.value.thumb ? import.meta.env.VITE_FILE_PREFIX + formState.value.thumb : '')
+const imgUrl = computed(() => formState.value.thumb ? window.globalVar.fileUrl + formState.value.thumb : '')
 
 const formState = ref({
   ident: '',
@@ -154,7 +154,7 @@ function customRequest({file, onSuccess, onError}) {
 
     fileUpload(formData).then(({ data }) => {
       formState.value.thumb = data.url
-      fileList.value = [{ url: import.meta.env.VITE_FILE_PREFIX + data.url }]
+      fileList.value = [{ url: window.globalVar.fileUrl + data.url }]
     })
   }
   reader.readAsArrayBuffer(file)
@@ -187,7 +187,6 @@ function handleRemoveImg() {
 function getDetail(id) {
   equipDetail({ id }).then(({ data }) => {
     formState.value = data
-    // data.thumb ? fileList.value = [{ url: import.meta.env.VITE_FILE_PREFIX + data.thumb }] : fileList.value = []
   })
 }
 

@@ -139,7 +139,7 @@ const columns = [
     key: 'deviceName'
   },
   {
-    title: '设备维护人员',  // 会有多个，显示与之前页面一致
+    title: '设备管理人员',  // 会有多个，显示与之前页面一致
     align: 'center',
     dataIndex: 'deviceManagerNames',
     key: 'deviceManagerNames'

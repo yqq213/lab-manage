@@ -16,7 +16,8 @@ class Request {
   instance: AxiosInstance
   // 基础配置
   baseConfig: AxiosRequestConfig = {
-    baseURL: import.meta.env.VITE_BASIC_API_URL,
+    // baseURL: import.meta.env.VITE_BASIC_API_URL,
+    baseURL: window.globalVar.requestUrl,
     timeout: 20000,
     headers: {
       "Content-Type": "application/json",
