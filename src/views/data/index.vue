@@ -48,11 +48,25 @@
             }"
             placeholder="分组"
             @change="pagination.current = 1, getList()">
-            <a-select-option :value="2">分组1</a-select-option>
           </a-select>
         </a-col>
         <a-col>
           <a-input-search v-model:value="queryParam.userName" enter-button placeholder="使用人员" @search="pagination.current = 1, getList()" />
+        </a-col>
+        <a-col>
+          <a-select
+            v-model:value="queryParam.examinerName"
+            show-search
+            allowClear
+            :options="checkUserList"
+            :filter-option="filterOption"
+            :fieldNames="{
+              label: 'name',
+              value: 'name'
+            }"
+            placeholder="审核人员"
+            @change="pagination.current = 1, getList()">
+          </a-select>
         </a-col>
       </a-row>
       <a-button type="primary" :loading="exportLoading" @click="handleExport">
@@ -89,6 +103,7 @@ import { getEquipList } from '@/api/equip/index'
 import { getLabList } from '@/api/lab/index'
 import { getGroupList } from '@/api/group/index'
 import { getDataList } from '@/api/data/index'
+import { userList } from '@/api/user/index'
 import Member from '@/components/Member/index.vue'
 import * as XLSX from 'xlsx'
 
@@ -106,6 +121,7 @@ const exportLoading = ref(false)
 const equipList = ref([])
 const labList = ref([])
 const groupList = ref([])
+const checkUserList = ref([])
 
 const tableList = ref([])
 
@@ -224,16 +240,19 @@ function getList() {
   }).catch(() => { loading.value = false })
 }
 
-// 获取设备、实验室、分组列表
+// 获取设备、实验室、分组、老师列表
 function initFilterList() {
-  getEquipList({ order: '0', page: 1, pageSize: 10000 }).then(({ data }) => {
+  getEquipList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     equipList.value = data.list || []
   })
-  getLabList({ order: '0', page: 1, pageSize: 10000 }).then(({ data }) => {
+  getLabList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     labList.value = data.list || []
   })
-  getGroupList({ order: '0', page: 1, pageSize: 10000 }).then(({ data }) => {
+  getGroupList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     groupList.value = data.list || []
+  })
+  userList({ order: '0', page: 1, pageSize: 1000, role: '1', status: '0' }).then(({ data }) => {
+    checkUserList.value = data.list
   })
 }
 
@@ -280,7 +299,7 @@ onMounted(() => {
     .flex(space-between);
     margin-bottom: 20px;
     &-left {
-      width: 85%;
+      width: 90%;
       .flex(space-between, center);
       flex-wrap: nowrap;
       :deep(.ant-col) {
