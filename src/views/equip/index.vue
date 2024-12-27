@@ -35,12 +35,12 @@
     <!-- 管理人员 -->
     <a-modal
       v-model:open="modalVisible"
-      title="分配老师"
+      title="分配管理员"
       width="800px"
       :afterClose="handleClose"
       :footer="null">
       <div class="add-form">
-        <a-select allowClear v-model:value="formState.userId" placeholder="请选择要分配的老师" style="width: 300px; margin-right: 20px;">
+        <a-select allowClear v-model:value="formState.userId" placeholder="请选择要分配的管理员" style="width: 300px; margin-right: 20px;">
           <a-select-option v-for="item in allTeacher" :key="item.id" :value="item.id" :disabled="editObj.managers && editObj.managers.includes(item.id)">{{ item.name }}</a-select-option>
         </a-select>
         <a-button type="primary" @click="handleAdd">添加</a-button>
@@ -179,9 +179,9 @@ function handleDelete(record) {
 
 // 添加老师
 function handleAdd() {
-  if (!formState.userId) return message.error('请选择要分配的老师')
+  if (!formState.userId) return message.error('请选择要分配的管理员')
   addManager({ deviceId: editObj.value.id, userId: formState.userId }).then(() => {
-    message.success('分配老师成功')
+    message.success('分配管理员成功')
     getList().then(() => {
       // 更新editObj对象数据
       editObj.value = tableList.value.find(v => v.id === editObj.value.id)
