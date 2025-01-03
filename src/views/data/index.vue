@@ -88,9 +88,9 @@
         <template v-if="column.dataIndex === 'group'">
           <a-tag color="#1f9172">{{ text }}</a-tag>
         </template>
-        <template v-if="column.dataIndex === 'deviceManagerNames'">
+        <!-- <template v-if="column.dataIndex === 'deviceManagerNames'">
           <Member :list="record.deviceManagerNames || []" />
-        </template>
+        </template> -->
       </template>
     </a-table>
   </div>
@@ -138,12 +138,12 @@ const columns = [
     dataIndex: 'deviceName',
     key: 'deviceName'
   },
-  {
-    title: '设备管理人员',  // 会有多个，显示与之前页面一致
-    align: 'center',
-    dataIndex: 'deviceManagerNames',
-    key: 'deviceManagerNames'
-  },
+  // {
+  //   title: '设备管理人员',  // 会有多个，显示与之前页面一致
+  //   align: 'center',
+  //   dataIndex: 'deviceManagerNames',
+  //   key: 'deviceManagerNames'
+  // },
   {
     title: '实验室所在地',
     align: 'center',
