@@ -191,12 +191,14 @@ function getList() {
   userList({ order: '0', page: pagination.value.current, pageSize: pagination.value.pageSize, name: searchName.value, role: currentRole.value }).then(({ data }) => {
     loading.value = false
     tableList.value = data.list
+    pagination.value.total = Number(data.pageTotal)
   }).catch(() => { loading.value = false })
 }
 
 // 分页事件
 function handleSizeChange(page) {
   pagination.value = page
+  getList()
 }
 
 // 详情、新增、编辑
