@@ -6,6 +6,7 @@ import { message as Message } from 'ant-design-vue'
 import { Storage } from '@/utils/storage'
 import router from '@/router'
 import { useUserStore } from '@/stores/user'
+import { des_encrypt, des_decrypt } from '@/utils/index'
 
 const store = useUserStore()
 
@@ -30,7 +31,12 @@ class Request {
     this.instance.interceptors.request.use(
       (config) => {
         config.headers['X-Access-Token'] = Storage.get('token')
-        // config.headers['Blade-Auth'] = 'bearer ' + Storage.get(storageTokenKey)?.content
+        // 加密入参
+        if (!config.noCrypto) {
+          config.data = {
+            sign: des_encrypt(config.data)
+          }
+        }
         return config
       },
       (error: AxiosError) => {
@@ -40,6 +46,9 @@ class Request {
     // response 拦截器
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
+        // 解密出参
+        const decryptStr = des_decrypt(response.data.sign ?? '')
+        response.data = JSON.parse(decryptStr)
         if (response?.data?.code == 200) {
           return response.data
         } else {

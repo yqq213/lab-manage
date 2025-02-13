@@ -69,7 +69,7 @@ const roleName = computed(() => props.role == '1' ? '老师' : '学生')
 
 // form
 const formState = ref({
-  password: '123456',  // 初始密码123456
+  password: '!User234',  // 初始密码!User234
   gender: '1'
 })
 const formRef = ref()

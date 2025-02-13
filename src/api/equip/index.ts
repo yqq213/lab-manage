@@ -38,5 +38,5 @@ export const myDeviceList: (data) => Promise<BizResponse<any>> = (data) => {
 
 // 文件上传
 export const fileUpload: (data) => Promise<BizResponse<any>> = (data) => {
-  return request.post('/api/v1.0.0/files/uploadSingleFile', data, {headers: {'Content-Type': 'multipart/form-data'}})
+  return request.post('/api/v1.0.0/files/uploadSingleFile', data, {headers: {'Content-Type': 'multipart/form-data'}, noCrypto: true})
 }

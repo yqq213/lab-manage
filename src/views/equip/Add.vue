@@ -154,7 +154,7 @@ function customRequest({file, onSuccess, onError}) {
 
     fileUpload(formData).then(({ data }) => {
       formState.value.thumb = data.url
-      fileList.value = [{ url: window.globalVar.fileUrl + data.url }]
+      // fileList.value = [{ url: window.globalVar.fileUrl + data.url }]
     })
   }
   reader.readAsArrayBuffer(file)
