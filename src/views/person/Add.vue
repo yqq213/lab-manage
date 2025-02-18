@@ -118,7 +118,7 @@ function handleClose() {
 watch(() => props.row, (obj) => {
   formState.value = { ...obj }
   if (props.mode === 'add') {
-    formState.value.password = '123456'
+    formState.value.password = '!User234'
     formState.value.gender = '1'
   }
 })

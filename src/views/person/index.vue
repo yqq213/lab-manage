@@ -281,7 +281,7 @@ function customRequest({file, onSuccess, onError}) {
         }
       })
       obj.account = obj.ident
-      obj.password = '123456'
+      obj.password = '!User234'
       obj.role = currentRole.value
       obj.gender === '男' ? obj.gender = '1' : obj.gender === '女' ? obj.gender = '2' : obj.gender = undefined
       return obj
