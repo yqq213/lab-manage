@@ -12,6 +12,8 @@ const store = useUserStore()
 
 let showMessageFlag = false   // 页面是否正在展示提示
 
+const enableEncrypt = import.meta.env.VITE_ENABLE_ENCRYPT === 'true'
+
 class Request {
   // axios 实例
   instance: AxiosInstance
@@ -32,7 +34,7 @@ class Request {
       (config) => {
         config.headers['X-Access-Token'] = Storage.get('token')
         // 加密入参
-        if (!config.noCrypto) {
+        if (!config.noCrypto && enableEncrypt) {
           config.data = {
             sign: des_encrypt(config.data)
           }
@@ -47,8 +49,10 @@ class Request {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
         // 解密出参
-        const decryptStr = des_decrypt(response.data.sign ?? '')
-        response.data = JSON.parse(decryptStr)
+        if (enableEncrypt) {
+          const decryptStr = des_decrypt(response.data.sign ?? '')
+          response.data = JSON.parse(decryptStr)
+        }
         if (response?.data?.code == 200) {
           return response.data
         } else {
