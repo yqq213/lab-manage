@@ -17,6 +17,16 @@
     </div>
     <a-table size="middle" :dataSource="tableList" :columns="columns" :loading="loading" :pagination="pagination" @change="handleSizeChange">
       <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'costType'">
+          <div v-if="record.costType === '0'">按小时计费</div>
+          <div v-if="record.costType === '1'">按天计费</div>
+          <div v-if="record.costType === '2'">按周计费</div>
+        </template>
+        <template v-if="column.dataIndex === 'customPrice'">
+          <div v-if="record.costType === '0'">{{ record.price }}</div>
+          <div v-if="record.costType === '1'">{{ record.priceDay }}</div>
+          <div v-if="record.costType === '2'">{{ record.priceWeek }}</div>
+        </template>
         <template v-if="column.dataIndex === 'managers'">
           <a-tooltip placement="top" v-if="record.managers">
             <template #title v-if="record.managers.length > 5">
@@ -101,13 +111,20 @@ const columns = [
     title: '设备名称',
     align: 'center',
     dataIndex: 'name',
-    key: 'name'
+    key: 'name',
+    width: '20%',
   },
   {
-    title: '收费标准（元/小时）',
+    title: '收费方式',
     align: 'center',
-    dataIndex: 'price',
-    key: 'price'
+    dataIndex: 'costType',
+    key: 'costType'
+  },
+  {
+    title: '收费标准（元）',
+    align: 'center',
+    dataIndex: 'customPrice',
+    key: 'customPrice'
   },
   {
     title: '管理人员',

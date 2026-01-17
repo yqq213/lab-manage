@@ -18,15 +18,28 @@
       <a-form-item name="password" :label="roleName + '密码'">
         <a-input-password v-model:value="formState.password" placeholder="请输入密码（必填）" />
       </a-form-item>
-      <a-form-item name="department" :label="roleName + '院系'" v-if="role == '0'">
-        <a-input v-model:value="formState.department" placeholder="请输入院系（必填）" />
-      </a-form-item>
       <a-form-item name="gender" :label="roleName + '性别'">
         <a-radio-group v-model:value="formState.gender">
           <a-radio value="1">男</a-radio>
           <a-radio value="2">女</a-radio>
         </a-radio-group>
       </a-form-item>
+      <template v-if="role == '0'">
+        <a-form-item name="department" label="学生院系">
+          <a-input v-model:value="formState.department" placeholder="请输入院系（必填）" />
+        </a-form-item>
+        <a-form-item name="grade" label="学生年级">
+          <a-input v-model:value="formState.grade" placeholder="请输入年级（必填）" />
+        </a-form-item>
+        <a-form-item name="tutor" label="学生导师">
+          <a-input v-model:value="formState.tutor" placeholder="请输入导师（必填）" />
+        </a-form-item>
+      </template>
+      <template v-if="role == '2'">
+        <a-form-item name="enterprice" label="公司名称">
+          <a-input v-model:value="formState.enterprice" placeholder="请输入公司（必填）" />
+        </a-form-item>
+      </template>
     </a-form>
   </a-modal>
 </template>
@@ -56,7 +69,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'refresh'])
+const emit = defineEmits(['update:modelValue', 'refresh', 'close'])
 
 const modalVisible = computed({
   get: () => props.modelValue,
@@ -65,7 +78,7 @@ const modalVisible = computed({
 
 const title = computed(() => props.mode === 'edit' ? '编辑' : props.mode === 'add' ? '添加' : '查看')
 
-const roleName = computed(() => props.role == '1' ? '老师' : '学生')
+const roleName = computed(() => props.role == '1' ? '老师' : props.role == '2' ? '用户' : '学生')
 
 // form
 const formState = ref({
@@ -87,10 +100,13 @@ const checkPhone = async (_rule: Rule, value: string) => {
 const rules: Record<string, Rule[]> = {
   ident: [{ required: true, message: '编号不能为空！', trigger: 'blur' }],
   name: [{ required: true, message: '姓名不能为空！', trigger: 'blur' }],
-  phone: [{ required: true, message: '手机不能为空！', trigger: 'blur' }, { validator: checkPhone, trigger: blur }],
+  phone: [{ required: true, message: '手机不能为空！', trigger: 'blur' }],
   // password: [{ required: true, message: '密码不能为空！', trigger: 'blur' }],
   department: [{ required: true, message: '院系不能为空！', trigger: 'blur' }],
+  grade: [{ required: true, message: '年级不能为空！', trigger: 'blur' }],
+  tutor: [{ required: true, message: '导师不能为空！', trigger: 'blur' }],
   gender: [{ required: true, message: '性别不能为空！', trigger: 'change' }],
+  enterprice: [{ required: true, message: '公司不能为空！', trigger: 'blur' }],
 }
 
 // 确定
@@ -98,8 +114,8 @@ function handleOk() {
   if (props.mode === 'view') return modalVisible.value = false
   formRef.value.validate().then(() => {
     const api = props.mode === 'add' ? regist : updateUser
-    // account字段使用ident的值
-    formState.value.account = formState.value.ident
+    // 老师和学生account字段使用ident的值，校外用户account字段使用phone的值
+    formState.value.account = props.role == '2' ? formState.value.phone : formState.value.ident
     formState.value.role = props.role
     api(formState.value).then(() => {
       modalVisible.value = false
@@ -113,6 +129,7 @@ function handleOk() {
 function handleClose() {
   formRef.value.resetFields()
   emit('update:modelValue', false)
+  emit('close')
 }
 
 watch(() => props.row, (obj) => {

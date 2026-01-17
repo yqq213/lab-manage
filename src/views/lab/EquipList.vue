@@ -3,7 +3,20 @@
     title="设备列表"
     width="900px"
     :footer="null">
-    <a-table size="middle" :dataSource="tableList" :columns="columns" :pagination="false" :scroll="{ y: 500 }"></a-table>
+    <a-table size="middle" :dataSource="tableList" :columns="columns" :pagination="false" :scroll="{ y: 500 }">
+      <template #bodyCell="{ column, text, record }">
+        <template v-if="column.dataIndex === 'costType'">
+          <div v-if="record.costType === '0'">按小时计费</div>
+          <div v-if="record.costType === '1'">按天计费</div>
+          <div v-if="record.costType === '2'">按周计费</div>
+        </template>
+        <template v-if="column.dataIndex === 'customPrice'">
+          <div v-if="record.costType === '0'">{{ record.price }}</div>
+          <div v-if="record.costType === '1'">{{ record.priceDay }}</div>
+          <div v-if="record.costType === '2'">{{ record.priceWeek }}</div>
+        </template>
+      </template>
+    </a-table>
   </a-modal>
 </template>
 
@@ -40,12 +53,17 @@ const columns = [
     key: 'name'
   },
   {
-    title: '收费标准（元/小时）',
+    title: '收费方式',
     align: 'center',
-    width: '33.3%',
-    dataIndex: 'price',
-    key: 'price'
-  }
+    dataIndex: 'costType',
+    key: 'costType'
+  },
+  {
+    title: '收费标准（元）',
+    align: 'center',
+    dataIndex: 'customPrice',
+    key: 'customPrice'
+  },
 ]
 
 // 根据实验室查询设备列表

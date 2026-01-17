@@ -3,7 +3,7 @@ import type { BizResponse } from '#/axios'
 
 // 登录
 export const login: (data) => Promise<BizResponse<any>> = (data) => {
-  return request.post('/api/v1.0.0/auth/login', data)
+  return request.post('/api/v1.0.0/auth/login', data, { headers: { noCrypto: true} })
 }
 
 // 注册
@@ -34,4 +34,14 @@ export const updateUser: (data) => Promise<BizResponse<any>> = (data) => {
 // 重置密码
 export const resetPwd: (data) => Promise<BizResponse<any>> = (data) => {
   return request.post('/api/v1.0.0/auth/resetPwd', data)
+}
+
+// 审核
+export const audit: (data) => Promise<BizResponse<any>> = (data) => {
+  return request.post('/api/v1.0.0/auth/examine', data)
+}
+
+// 批量审核
+export const batchExamine: (data) => Promise<BizResponse<any>> = (data) => {
+  return request.post('/api/v1.0.0/auth/batchExamine', data)
 }

@@ -5,3 +5,8 @@ import type { BizResponse } from '#/axios'
 export const getDataList: (data) => Promise<BizResponse<any>> = (data) => {
   return request.post('/api/v1.0.0/record/lists', data)
 }
+
+// 数据统计
+export const statistValueApi: (data) => Promise<BizResponse<any>> = (data) => {
+  return request.post('/api/v1.0.0/record/statistValue', data)
+}

@@ -3,7 +3,15 @@
     <div class="filter">
       <a-row :gutter="20" class="filter-left">
         <a-col style="min-width: 250px;">
-          <a-range-picker v-model:value="queryDate" :placeholder="['开始时间', '结束时间']" valueFormat="YYYY-MM-DD" @change="pagination.current = 1, getList()"/>
+          <a-range-picker 
+            :value="queryDate"
+            :placeholder="['开始时间', '结束时间']"
+            valueFormat="YYYYMMDD"
+            :disabled-date="disabledDate"
+            @openChange="onOpenChange"
+            @calendarChange="onCalendarChange"
+            @change="handleDateChange"
+          />
         </a-col>
         <a-col>
           <a-select
@@ -17,7 +25,7 @@
               value: 'name'
             }"
             placeholder="设备"
-            @change="pagination.current = 1, getList()">
+            @change="pagination.current = 1, getList(), getStatistic()">
           </a-select>
         </a-col>
         <a-col>
@@ -32,7 +40,7 @@
               value: 'name'
             }"
             placeholder="实验室"
-            @change="pagination.current = 1, getList()">
+            @change="pagination.current = 1, getList(), getStatistic()">
           </a-select>
         </a-col>
         <a-col>
@@ -47,11 +55,11 @@
               value: 'name'
             }"
             placeholder="分组"
-            @change="pagination.current = 1, getList()">
+            @change="pagination.current = 1, getList(), getStatistic()">
           </a-select>
         </a-col>
         <a-col>
-          <a-input-search v-model:value="queryParam.userName" enter-button placeholder="使用人员" @search="pagination.current = 1, getList()" />
+          <a-input-search v-model:value="queryParam.userName" enter-button placeholder="使用人员" @search="pagination.current = 1, getList(), getStatistic()" />
         </a-col>
         <a-col>
           <a-select
@@ -65,7 +73,7 @@
               value: 'name'
             }"
             placeholder="审核人员"
-            @change="pagination.current = 1, getList()">
+            @change="pagination.current = 1, getList(), getStatistic()">
           </a-select>
         </a-col>
       </a-row>
@@ -76,7 +84,16 @@
         导出
       </a-button>
     </div>
-    <!-- :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }" -->
+    <div class="statistic">
+      <template v-if="queryParam.deviceName">
+        <a-tag color="orange">单设备费用: {{ statisticData?.cost }}元</a-tag>
+        <a-tag color="orange">单设备时长: {{ statisticData?.duration }}小时</a-tag>
+      </template>
+      <template v-else>
+        <a-tag color="orange">总费用: {{ statisticData?.cost }}元</a-tag>
+        <a-tag color="orange">总时长: {{ statisticData?.duration }}小时</a-tag>
+      </template>
+    </div>
     <a-table
       size="middle"
       :dataSource="tableList"
@@ -87,6 +104,25 @@
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'group'">
           <a-tag color="#1f9172">{{ text }}</a-tag>
+        </template>
+        <template v-if="column.dataIndex === 'costType'">
+          <div v-if="record.costType === '0'">按小时计费</div>
+          <div v-if="record.costType === '1'">按天计费</div>
+          <div v-if="record.costType === '2'">按周计费</div>
+        </template>
+        <template v-if="column.dataIndex === 'customPrice'">
+          <div v-if="record.costType === '0'">{{ record.price }}</div>
+          <div v-if="record.costType === '1'">{{ record.priceDay }}</div>
+          <div v-if="record.costType === '2'">{{ record.priceWeek }}</div>
+        </template>
+        <template v-if="column.dataIndex === 'date'">
+          {{ dayjs(record.startDate).format('YYYY-MM-DD') + ' - ' + dayjs(record.endDate).format('YYYY-MM-DD') }}
+        </template>
+        <template v-if="column.dataIndex === 'openDate'">
+          {{ dayjs(record.openDate).format('YYYY-MM-DD') + ' ' + record.startTime }}
+        </template>
+        <template v-if="column.dataIndex === 'closeDate'">
+          {{ dayjs(record.closeDate).format('YYYY-MM-DD') + ' ' + record.endTime }}
         </template>
         <!-- <template v-if="column.dataIndex === 'deviceManagerNames'">
           <Member :list="record.deviceManagerNames || []" />
@@ -102,14 +138,21 @@ import { UploadOutlined } from '@ant-design/icons-vue'
 import { getEquipList } from '@/api/equip/index'
 import { getLabList } from '@/api/lab/index'
 import { getGroupList } from '@/api/group/index'
-import { getDataList } from '@/api/data/index'
+import { getDataList, statistValueApi } from '@/api/data/index'
 import { userList } from '@/api/user/index'
 import Member from '@/components/Member/index.vue'
 import * as XLSX from 'xlsx'
+import dayjs from 'dayjs'
+
+interface IOption {
+  name: string,
+  id: string,
+}
 
 const queryParam = reactive({})
 
-const queryDate = ref([])
+const queryDate = ref([dayjs().format('YYYYMMDD'), dayjs().format('YYYYMMDD')])
+const dates = ref([])
 
 const selectedRowKeys = ref([])
 
@@ -118,10 +161,14 @@ const loading = ref(false)
 const exportLoading = ref(false)
 
 // 筛选条件列表
-const equipList = ref([])
-const labList = ref([])
-const groupList = ref([])
-const checkUserList = ref([])
+const equipList = ref<IOption[]>([])
+const labList = ref<IOption[]>([])
+const groupList = ref<IOption[]>([])
+const checkUserList = ref<IOption[]>([])
+const statisticData = ref<{
+  cost: string,
+  duration: string,
+}>()
 
 const tableList = ref([])
 
@@ -136,7 +183,8 @@ const columns = [
     title: '设备名称',
     align: 'center',
     dataIndex: 'deviceName',
-    key: 'deviceName'
+    key: 'deviceName',
+    width: 150
   },
   // {
   //   title: '设备管理人员',  // 会有多个，显示与之前页面一致
@@ -148,25 +196,29 @@ const columns = [
     title: '实验室所在地',
     align: 'center',
     dataIndex: 'labRoomAddress',
-    key: 'labRoomAddress'
+    key: 'labRoomAddress',
+    width: 120
   },
   {
     title: '价格(元/小时)',
     align: 'center',
     dataIndex: 'price',
-    key: 'price'
+    key: 'price',
+    width: 110
   },
   {
     title: '使用人员',
     align: 'center',
     dataIndex: 'userName',
-    key: 'userName'
+    key: 'userName',
+    width: 100
   },
   {
     title: '审核人员',
     align: 'center',
     dataIndex: 'examinerName',
-    key: 'examinerName'
+    key: 'examinerName',
+    width: 100
   },
   {
     title: '人员分组',
@@ -178,26 +230,44 @@ const columns = [
     title: '预约日期',
     align: 'center',
     dataIndex: 'date',
-    key: 'date'
+    key: 'date',
+    width: 120
   },
   {
     title: '上机时间',
     align: 'center',
-    dataIndex: 'startTime',
-    key: 'startTime'
+    dataIndex: 'openDate',
+    key: 'openDate',
+    width: 100
   },
   {
     title: '下机时间',
     align: 'center',
-    dataIndex: 'endTime',
-    key: 'endTime'
+    dataIndex: 'closeDate',
+    key: 'closeDate',
+    width: 100
   },
   {
     title: '时长(小时)',
     align: 'center',
     dataIndex: 'duration',
-    key: 'duration'
-  }
+    key: 'duration',
+    width: 100
+  },
+  {
+    title: '收费方式',
+    align: 'center',
+    dataIndex: 'costType',
+    key: 'costType',
+    width: 80
+  },
+  {
+    title: '收费标准（元）',
+    align: 'center',
+    dataIndex: 'customPrice',
+    key: 'customPrice',
+    width: 110
+  },
 ]
 
 const pagination = ref({
@@ -218,8 +288,46 @@ function handleSizeChange(page) {
   getList()
 }
 
-function onSelectChange() {
-  
+function handleDateChange(val) {
+  queryDate.value = val
+  pagination.value.current = 1
+  getList()
+}
+
+function onOpenChange(open) {
+  if (open) {
+    dates.value = [] as any;
+  }
+}
+
+function onCalendarChange(val) {
+  dates.value = val
+}
+
+// 限制日期选择范围为90天
+function disabledDate(current) {
+  if (dates.value.length === 0) {
+    return false
+  }
+  const tooLate = dates.value[0] && current.diff(dates.value[0], 'days') > 90;
+  const tooEarly = dates.value[1] && dayjs(dates.value[1]).diff(current, 'days') > 90;
+  return tooEarly || tooLate;
+}
+
+// 获取统计
+function getStatistic() {
+  statistValueApi({
+    order: '0',
+    page: pagination.value.current,
+    pageSize: pagination.value.pageSize,
+    ...queryParam,
+    startDate: queryDate.value?.[0],
+    endDate: queryDate.value?.[1],
+    status: '0',
+    costStatus: '1'
+  }).then(({ data }) => {
+    statisticData.value = data || {}
+  })
 }
 
 // 获取列表
@@ -231,7 +339,9 @@ function getList() {
     pageSize: pagination.value.pageSize,
     ...queryParam,
     startDate: queryDate.value?.[0],
-    endDate: queryDate.value?.[1]
+    endDate: queryDate.value?.[1],
+    status: '0',
+    costStatus: '1'
   }
   getDataList(param).then(({ data }) => {
     loading.value = false
@@ -241,17 +351,17 @@ function getList() {
 }
 
 // 获取设备、实验室、分组、老师列表
-function initFilterList() {
-  getEquipList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+async function initFilterList() {
+  await getEquipList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     equipList.value = data.list || []
   })
-  getLabList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+  await getLabList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     labList.value = data.list || []
   })
-  getGroupList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+  await getGroupList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     groupList.value = data.list || []
   })
-  userList({ order: '0', page: 1, pageSize: 1000, role: '1', status: '0' }).then(({ data }) => {
+  await userList({ order: '0', page: 1, pageSize: 1000, role: '1', status: '0' }).then(({ data }) => {
     checkUserList.value = data.list
   })
 }
@@ -285,9 +395,15 @@ function handleExport() {
   })
 }
 
-onMounted(() => {
-  initFilterList()
+// 计算费用
+// function getCost(record) {
+//   return (Number(record.price) * Number(record.duration)).toFixed(2)
+// }
+
+onMounted(async () => {
+  await initFilterList()
   getList()
+  getStatistic()
 })
 
 </script>
@@ -297,7 +413,7 @@ onMounted(() => {
   padding: 20px;
   .filter {
     .flex(space-between);
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     &-left {
       width: 90%;
       .flex(space-between, center);
@@ -309,6 +425,10 @@ onMounted(() => {
         }
       }
     }
+  }
+  .statistic {
+    height: 50px;
+    .flex(flex-start, center);
   }
 }
 </style>

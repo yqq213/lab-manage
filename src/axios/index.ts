@@ -32,6 +32,7 @@ class Request {
     // request 拦截器
     this.instance.interceptors.request.use(
       (config) => {
+        console.log('url：', config.url, '请求入参：', config.data)
         config.headers['X-Access-Token'] = Storage.get('token')
         // 加密入参
         if (!config.noCrypto && enableEncrypt) {
@@ -49,10 +50,11 @@ class Request {
     this.instance.interceptors.response.use(
       (response: AxiosResponse) => {
         // 解密出参
-        if (enableEncrypt) {
+        if (enableEncrypt && response.data?.sign) {
           const decryptStr = des_decrypt(response.data.sign ?? '')
           response.data = JSON.parse(decryptStr)
         }
+        console.log('url：', response.request.responseURL, '响应参数：', response.data)
         if (response?.data?.code == 200) {
           return response.data
         } else {

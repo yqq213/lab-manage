@@ -14,9 +14,22 @@
         <a-form-item name="name" label="设备名称">
           <a-input v-model:value="formState.name" placeholder="设备名称最多40个字（必填）" :maxlength="40"/>
         </a-form-item>
+        <a-form-item name="costType" label="收费方式">
+          <a-select v-model:value="formState.costType" placeholder="请选择收费方式">
+            <a-select-option :value="item.value" v-for="item in feeTypeList" :key="item.value">{{ item.label }}</a-select-option>
+          </a-select>
+        </a-form-item>
         <a-form-item name="price" label="收费标准" class="label-suffix-item">
           <a-input-number v-model:value="formState.price" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
           <span class="label-suffix">元/小时</span>
+        </a-form-item>
+        <a-form-item name="priceDay" label="收费标准" class="label-suffix-item" v-if="formState.costType == '1'">
+          <a-input-number v-model:value="formState.priceDay" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
+          <span class="label-suffix">元/天</span>
+        </a-form-item>
+        <a-form-item name="priceWeek" label="收费标准" class="label-suffix-item" v-if="formState.costType == '2'">
+          <a-input-number v-model:value="formState.priceWeek" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
+          <span class="label-suffix">元/周</span>
         </a-form-item>
         <a-form-item name="labRoomId" label="实验室">
           <a-select v-model:value="formState.labRoomId" placeholder="请选择实验室">
@@ -104,6 +117,9 @@ const formState = ref({
   ident: '',
   name: '',
   price: '',
+  priceDay: '',
+  priceWeek: '',
+  costType: null,
   labRoomId: null,
   paramInfo: '',
   abilityInfo: '',
@@ -117,6 +133,9 @@ const formState = ref({
 const rules: Record<string, Rule[]> = {
   name: [{ required: true, message: '设备名称不能为空！', trigger: 'blur' }],
   price: [{ required: true, message: '收费标准不能为空！', trigger: 'blur' }],
+  priceDay: [{ required: true, message: '收费标准不能为空！', trigger: 'blur' }],
+  priceWeek: [{ required: true, message: '收费标准不能为空！', trigger: 'blur' }],
+  costType: [{ required: true, message: '收费方式不能为空！', trigger: 'change' }],
   paramInfo: [{ required: true, message: '设备参数不能为空！', trigger: 'blur' }],
   abilityInfo: [{ required: true, message: '设备功能不能为空！', trigger: 'blur' }],
   operateInfo: [{ required: true, message: '设备操作不能为空！', trigger: 'blur' }],
@@ -126,6 +145,12 @@ const rules: Record<string, Rule[]> = {
 }
 
 const formRef = ref()
+
+const feeTypeList = [
+  { label: '按小时收费', value: '0' },
+  { label: '按天收费', value: '1' },
+  { label: '按周收费', value: '2' }
+]
 
 // 上传图片校验
 function beforeUpload(file) {
