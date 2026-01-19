@@ -177,14 +177,15 @@ const columns = [
     title: '设备编号',
     align: 'center',
     dataIndex: 'deviceIdent',
-    key: 'deviceIdent'
+    key: 'deviceIdent',
+    width: 120
   },
   {
     title: '设备名称',
     align: 'center',
     dataIndex: 'deviceName',
     key: 'deviceName',
-    width: 150
+    width: 120
   },
   // {
   //   title: '设备管理人员',  // 会有多个，显示与之前页面一致
@@ -198,13 +199,6 @@ const columns = [
     dataIndex: 'labRoomAddress',
     key: 'labRoomAddress',
     width: 120
-  },
-  {
-    title: '价格(元/小时)',
-    align: 'center',
-    dataIndex: 'price',
-    key: 'price',
-    width: 110
   },
   {
     title: '使用人员',
@@ -224,7 +218,8 @@ const columns = [
     title: '人员分组',
     align: 'center',
     dataIndex: 'topicGroupName',
-    key: 'topicGroupName'
+    key: 'topicGroupName',
+    width: 120
   },
   {
     title: '预约日期',
@@ -255,6 +250,20 @@ const columns = [
     width: 100
   },
   {
+    title: '费用(元)',
+    align: 'center',
+    dataIndex: 'cost',
+    key: 'cost',
+    width: 80
+  },
+  {
+    title: '价格(元/小时)',
+    align: 'center',
+    dataIndex: 'price',
+    key: 'price',
+    width: 110
+  },
+  {
     title: '收费方式',
     align: 'center',
     dataIndex: 'costType',
@@ -262,7 +271,7 @@ const columns = [
     width: 80
   },
   {
-    title: '收费标准（元）',
+    title: '收费标准(元)',
     align: 'center',
     dataIndex: 'customPrice',
     key: 'customPrice',
