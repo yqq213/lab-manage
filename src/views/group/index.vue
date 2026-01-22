@@ -28,6 +28,9 @@
         <template v-if="column.dataIndex === 'studentMembers'">
           <Member :list="record.studentMembers ? record.studentMembers.map(v => v.name) : []" />
         </template>
+        <template v-if="column.dataIndex === 'outsideMembers'">
+          <Member :list="record.outsideMembers ? record.outsideMembers.map(v => v.name) : []" />
+        </template>
         <template v-if="column.dataIndex === 'action'">
           <a-button size="small" @click="handleEdit(record)">编辑</a-button>
           <a-button size="small" type="primary" danger style="margin: 0 10px;" @click="handleDelete(record)">删除</a-button>
@@ -58,6 +61,11 @@
         <a-form-item name="studentMembers" label="学生组员">
           <a-select v-model:value="formState.studentMembers" mode="multiple" placeholder="请选择学生组员">
             <a-select-option :value="item.id" v-for="item in studentList" :key="item.id">{{ item.name }}</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item name="outsideMembers" label="校外人员">
+          <a-select v-model:value="formState.outsideMembers" mode="multiple" placeholder="请选择校外人员">
+            <a-select-option :value="item.id" v-for="item in outsideList" :key="item.id">{{ item.name }}</a-select-option>
           </a-select>
         </a-form-item>
       </a-form>
@@ -111,6 +119,12 @@ const columns = [
     key: 'studentMembers'
   },
   {
+    title: '校外人员',
+    align: 'center',
+    dataIndex: 'outsideMembers',
+    key: 'outsideMembers'
+  },
+  {
     title: '操作',
     align: 'center',
     dataIndex: 'action',
@@ -131,9 +145,11 @@ const rules: Record<string, Rule[]> = {
 
 const teacherList = ref([])
 const studentList = ref([])
+const outsideList = ref([])
 
 let studentMembersBak = []  // 编辑时备份学生成员
 let teacherMembersBak = []  // 编辑时备份老师成员
+let outsideMembersBak = []  // 编辑时备份校外人员
 
 // 获取列表
 function getList() {
@@ -160,13 +176,15 @@ function handleEdit(record) {
   editObj.value = record
   modalVisible.value = true
   formState.value = JSON.parse(JSON.stringify(record))
-  // 格式化teacherMembers与studentMembers
+  // 格式化teacherMembers与studentMembers、outsideMembers
   record.studentMembers ? formState.value.studentMembers = formState.value.studentMembers.map(v => v.id) : formState.value.studentMembers = []
   record.teacherMembers ? formState.value.teacherMembers = formState.value.teacherMembers.map(v => v.id) : formState.value.teacherMembers = []
-  // 编辑时将studentMembers与teacherMembers提前存储，方便提交时对比，判断出要删除的数据
+  record.outsideMembers ? formState.value.outsideMembers = formState.value.outsideMembers.map(v => v.id) : formState.value.outsideMembers = []
+  // 编辑时将studentMembers与teacherMembers、outsideMembers提前存储，方便提交时对比，判断出要删除的数据
   studentMembersBak = [...formState.value.studentMembers]
   teacherMembersBak = [...formState.value.teacherMembers]
-  console.log(studentMembersBak, teacherMembersBak)
+  outsideMembersBak = [...formState.value.outsideMembers]
+  console.log(studentMembersBak, teacherMembersBak, outsideMembersBak)
 }
 
 // 删除
@@ -198,9 +216,11 @@ function handleOk() {
       // 获取老师或学生组员中删除的数据
       param.delStudentMembers = studentMembersBak.filter(v => !formState.value.studentMembers.includes(v))
       param.delTeacherMembers = teacherMembersBak.filter(v => !formState.value.teacherMembers.includes(v))
+      param.delOutsideMembers = outsideMembersBak.filter(v => !formState.value.outsideMembers.includes(v))
     } else {
       param.delStudentMembers = []
       param.delTeacherMembers = []
+      param.delOutsideMembers = []
     }
     api(param).then(() => {
       isEditMode ? message.success('修改成功') : message.success('添加成功')
@@ -221,6 +241,7 @@ async function getAllTeacher() {
   const { data } = await userList({ order: '0', page: 1, pageSize: 10000, status: '0' })
   teacherList.value = data.list.filter(v => v.role == '1')
   studentList.value = data.list.filter(v => v.role == '0')
+  outsideList.value = data.list.filter(v => v.role == '2')
 }
 
 onMounted(async () => {

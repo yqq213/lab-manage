@@ -301,6 +301,7 @@ function handleDateChange(val) {
   queryDate.value = val
   pagination.value.current = 1
   getList()
+  getStatistic()
 }
 
 function onOpenChange(open) {
