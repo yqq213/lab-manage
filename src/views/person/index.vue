@@ -232,22 +232,22 @@ const externUserColumns = [
     title: '用户姓名',
     align: 'center',
     width: 150,
-    dataIndex: 'ident',
-    key: 'ident'
+    dataIndex: 'name',
+    key: 'name'
   },
   {
     title: '手机号',
     align: 'center',
     width: 150,
-    dataIndex: 'name',
-    key: 'name'
+    dataIndex: 'phone',
+    key: 'phone'
   },
   {
     title: '公司',
     align: 'center',
     width: 200,
-    dataIndex: 'phone',
-    key: 'phone'
+    dataIndex: 'enterprice',
+    key: 'enterprice'
   },
   {
     title: '审核状态',

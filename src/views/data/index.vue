@@ -102,9 +102,6 @@
       :pagination="pagination"
       @change="handleSizeChange">
       <template #bodyCell="{ column, text, record }">
-        <template v-if="column.dataIndex === 'group'">
-          <a-tag color="#1f9172">{{ text }}</a-tag>
-        </template>
         <template v-if="column.dataIndex === 'costType'">
           <div v-if="record.costType === '0'">按小时计费</div>
           <div v-if="record.costType === '1'">按天计费</div>
@@ -124,9 +121,6 @@
         <template v-if="column.dataIndex === 'closeDate'">
           {{ dayjs(record.closeDate).format('YYYY-MM-DD') + ' ' + record.endTime }}
         </template>
-        <!-- <template v-if="column.dataIndex === 'deviceManagerNames'">
-          <Member :list="record.deviceManagerNames || []" />
-        </template> -->
       </template>
     </a-table>
   </div>
@@ -380,7 +374,16 @@ async function initFilterList() {
 function handleExport() {
   exportLoading.value = true
   // 获取全部数据
-  getDataList({ order: '0', page: 1, pageSize: 10000, ...queryParam, startDate: queryDate.value?.[0], endDate: queryDate.value?.[1] }).then(({ data }) => {
+  getDataList({
+    order: '0',
+    page: 1,
+    pageSize: 10000,
+    ...queryParam,
+    startDate: queryDate.value?.[0],
+    endDate: queryDate.value?.[1],
+    status: '0',
+    costStatus: '1'
+  }).then(({ data }) => {
     const list = data.list || []
     // 表格数据
     const excelList = []
@@ -390,7 +393,27 @@ function handleExport() {
     const keyList = columns.map(v => v.dataIndex)
     list.forEach(item => {
       const excelRow = keyList.map(v => {
-        return Array.isArray(item[v]) ? item[v].join(',') : item[v]
+        if (Array.isArray(item[v])) {
+          return item[v].join(',')
+        } else if (v === 'date') {
+          return dayjs(item['startDate']).format('YYYY-MM-DD') + ' - ' + dayjs(item['endDate']).format('YYYY-MM-DD')
+        } else if (v === 'openDate') {
+          return dayjs(item['openDate']).format('YYYY-MM-DD') + ' ' + item['startTime']
+        } else if (v === 'closeDate') {
+          return dayjs(item['closeDate']).format('YYYY-MM-DD') + ' ' + item['endTime']
+        } else if (v === 'costType') {
+          if (item['costType'] === '0') return '按小时计费'
+          if (item['costType'] === '1') return '按天计费'
+          if (item['costType'] === '2') return '按周计费'
+          return ''
+        } else if (v === 'customPrice') {
+          if (item['costType'] === '0') return item['price']
+          if (item['costType'] === '1') return item['priceDay']
+          if (item['costType'] === '2') return item['priceWeek']
+          return ''
+        } else {
+          return item[v]
+        }
       })
       excelList.push(excelRow)
     })
