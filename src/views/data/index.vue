@@ -355,17 +355,17 @@ function getList() {
 }
 
 // 获取设备、实验室、分组、老师列表
-async function initFilterList() {
-  await getEquipList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+function initFilterList() {
+  getEquipList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     equipList.value = data.list || []
   })
-  await getLabList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+  getLabList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     labList.value = data.list || []
   })
-  await getGroupList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
+  getGroupList({ order: '0', page: 1, pageSize: 1000 }).then(({ data }) => {
     groupList.value = data.list || []
   })
-  await userList({ order: '0', page: 1, pageSize: 1000, role: '1', status: '0' }).then(({ data }) => {
+  userList({ order: '0', page: 1, pageSize: 1000, role: '1', status: '0' }).then(({ data }) => {
     checkUserList.value = data.list
   })
 }
@@ -433,8 +433,8 @@ function handleExport() {
 //   return (Number(record.price) * Number(record.duration)).toFixed(2)
 // }
 
-onMounted(async () => {
-  await initFilterList()
+onMounted(() => {
+  initFilterList()
   getList()
   getStatistic()
 })
