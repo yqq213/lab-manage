@@ -24,10 +24,10 @@
           <a-radio value="2">女</a-radio>
         </a-radio-group>
       </a-form-item>
+      <a-form-item v-if="role != '2'" name="department" :label="roleName + '院系'">
+        <a-input v-model:value="formState.department" placeholder="请输入院系（必填）" />
+      </a-form-item>
       <template v-if="role == '0'">
-        <a-form-item name="department" label="学生院系">
-          <a-input v-model:value="formState.department" placeholder="请输入院系（必填）" />
-        </a-form-item>
         <a-form-item name="grade" label="学生年级">
           <a-input v-model:value="formState.grade" placeholder="请输入年级（必填）" />
         </a-form-item>

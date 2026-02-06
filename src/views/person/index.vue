@@ -3,7 +3,7 @@
     <div class="filter">
       <a-row :gutter="20" class="filter-left">
         <a-col style="width: 200px;">
-          <a-select v-model:value="currentRole" @change="pagination.current = 1, getList()">
+          <a-select v-model:value="currentRole" @change="changeRole">
             <a-select-option value="1">老师</a-select-option>
             <a-select-option value="0">学生</a-select-option>
             <a-select-option value="2">校外用户</a-select-option>
@@ -283,6 +283,13 @@ const pagination = ref({
   size: 'middle'
 })
 
+// 切换角色
+function changeRole() {
+  pagination.value.current = 1
+  getList()
+  selectedRowKeys.value = [] // 清空勾选
+}
+
 // 获取列表
 function getList() {
   loading.value = true
@@ -352,6 +359,7 @@ function handleBatchAudit() {
     if (res.code == '200') {
       message.success(`批量审核完成，成功${res.data.successCount}个，失败${res.data.failureCount}个`)
       getList()
+      selectedRowKeys.value = [] // 清空勾选
     } else {
       message.error('批量审核失败')
     }
@@ -391,7 +399,7 @@ function customRequest({file, onSuccess, onError}) {
     // 封装数据
     const param = jsonData.map(item => {
       const obj = {}
-      const columnTeacherMap = [{ name: '老师编号', key: 'ident' }, { name: '老师姓名', key: 'name' }, { name: '老师手机', key: 'phone' }, { name: '老师性别', key: 'gender' }]
+      const columnTeacherMap = [{ name: '老师编号', key: 'ident' }, { name: '老师姓名', key: 'name' }, { name: '老师手机', key: 'phone' }, { name: '老师性别', key: 'gender' }, { name: '老师院系', key: 'department' }]
       const columnStudentMap = [{ name: '学生编号', key: 'ident' }, { name: '学生姓名', key: 'name' }, { name: '学生手机', key: 'phone' }, { name: '学生性别', key: 'gender' }, { name: '学生院系', key: 'department' }, { name: '学生年级', key: 'grade' }, { name: '学生导师', key: 'tutor' }]
       const columnExternUserMap = [{ name: '用户编号', key: 'ident' }, { name: '用户姓名', key: 'name' }, { name: '用户手机', key: 'phone' }, { name: '用户性别', key: 'gender' }, { name: '公司名称', key: 'enterprice' }]
       item.forEach((v, i) => {
