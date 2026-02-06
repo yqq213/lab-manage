@@ -208,6 +208,13 @@ const studentColumns = [
     key: 'phone'
   },
   {
+    title: '导师姓名',
+    align: 'center',
+    width: 150,
+    dataIndex: 'tutor',
+    key: 'tutor'
+  },
+  {
     title: '审核状态',
     align: 'center',
     width: 150,

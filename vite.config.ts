@@ -24,13 +24,13 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
       host: true,
       hmr: true,
       port: Number(env.VITE_PORT),
-      // proxy: {
-      //   '/attendance-admin': {
-      //     target: env.VITE_PROXY_API_URL,
-      //     changeOrigin: true,
-      //     rewrite: (path) => path.replace(/^\/attendance-admin/, '')
-      //   },
-      // }
+      proxy: {
+        '/api': {
+          target: env.VITE_PROXY_API_URL,
+          changeOrigin: true,
+          // rewrite: (path) => path.replace(/^\/attendance-admin/, '')
+        },
+      }
     },
     resolve: {
       alias: {

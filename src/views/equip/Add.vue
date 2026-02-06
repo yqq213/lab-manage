@@ -20,15 +20,15 @@
           </a-select>
         </a-form-item>
         <a-form-item name="price" label="收费标准" class="label-suffix-item">
-          <a-input-number v-model:value="formState.price" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
+          <a-input-number v-model:value="formState.price" :min="0" :precision="0" placeholder="收费标准必须为整数（必填）" />
           <span class="label-suffix">元/小时</span>
         </a-form-item>
         <a-form-item name="priceDay" label="收费标准" class="label-suffix-item" v-if="formState.costType == '1'">
-          <a-input-number v-model:value="formState.priceDay" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
+          <a-input-number v-model:value="formState.priceDay" :min="0" :precision="0" placeholder="收费标准必须为整数（必填）" />
           <span class="label-suffix">元/天</span>
         </a-form-item>
         <a-form-item name="priceWeek" label="收费标准" class="label-suffix-item" v-if="formState.costType == '2'">
-          <a-input-number v-model:value="formState.priceWeek" :min="1" :precision="0" placeholder="收费标准必须为整数（必填）" />
+          <a-input-number v-model:value="formState.priceWeek" :min="0" :precision="0" placeholder="收费标准必须为整数（必填）" />
           <span class="label-suffix">元/周</span>
         </a-form-item>
         <a-form-item name="labRoomId" label="实验室">
