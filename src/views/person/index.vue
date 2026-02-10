@@ -401,7 +401,7 @@ function customRequest({file, onSuccess, onError}) {
       const obj = {}
       const columnTeacherMap = [{ name: '老师编号', key: 'ident' }, { name: '老师姓名', key: 'name' }, { name: '老师手机', key: 'phone' }, { name: '老师性别', key: 'gender' }, { name: '老师院系', key: 'department' }]
       const columnStudentMap = [{ name: '学生编号', key: 'ident' }, { name: '学生姓名', key: 'name' }, { name: '学生手机', key: 'phone' }, { name: '学生性别', key: 'gender' }, { name: '学生院系', key: 'department' }, { name: '学生年级', key: 'grade' }, { name: '学生导师', key: 'tutor' }]
-      const columnExternUserMap = [{ name: '用户编号', key: 'ident' }, { name: '用户姓名', key: 'name' }, { name: '用户手机', key: 'phone' }, { name: '用户性别', key: 'gender' }, { name: '公司名称', key: 'enterprice' }]
+      const columnExternUserMap = [{ name: '用户姓名', key: 'name' }, { name: '用户手机', key: 'phone' }, { name: '用户性别', key: 'gender' }, { name: '公司名称', key: 'enterprice' }]
       item.forEach((v, i) => {
         try {
           if (currentRole.value === '1') obj[columnTeacherMap[i]['key']] = v
@@ -413,7 +413,12 @@ function customRequest({file, onSuccess, onError}) {
           throw new Error('请上传正确的excel模板')
         }
       })
-      obj.account = obj.ident
+      if (currentRole.value === '2') {
+        obj.account = obj.phone
+        obj.ident = obj.phone
+      } else {
+        obj.account = obj.ident
+      }
       obj.password = '!User234'
       obj.role = currentRole.value
       obj.gender === '男' ? obj.gender = '1' : obj.gender === '女' ? obj.gender = '2' : obj.gender = undefined

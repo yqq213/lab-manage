@@ -6,7 +6,7 @@
     :afterClose="handleClose"
     @ok="handleOk">
     <a-form :model="formState" :rules="rules" :disabled="mode === 'view'" ref="formRef" autocomplete="off" :labelCol="{ style: { width: '90px' } }" style="padding: 30px 50px;">
-      <a-form-item name="ident" :label="roleName + '编号'">
+      <a-form-item name="ident" :label="roleName + '编号'" v-if="role != '2'">
         <a-input v-model:value="formState.ident" placeholder="请输入编号（必填）" />
       </a-form-item>
       <a-form-item name="name" :label="roleName + '姓名'">
@@ -115,7 +115,12 @@ function handleOk() {
   formRef.value.validate().then(() => {
     const api = props.mode === 'add' ? regist : updateUser
     // 老师和学生account字段使用ident的值，校外用户account字段使用phone的值
-    formState.value.account = props.role == '2' ? formState.value.phone : formState.value.ident
+    if (props.role == '2') {
+      formState.value.account = formState.value.phone
+      formState.value.ident = formState.value.phone
+    } else {
+      formState.value.account = formState.value.ident
+    }
     formState.value.role = props.role
     api(formState.value).then(() => {
       modalVisible.value = false
